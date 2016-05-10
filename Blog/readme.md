@@ -313,12 +313,12 @@ manager.add_command("shell", Shell(make_context = make_shell_context))
 
 安装Flask-Migrate:`(venv) $ pip install flask-migrate`
 
-1. 创建迁移仓库：
+1.创建迁移仓库：
 ```
 (venv) $ python hello.py db init
 ```
 
-2. 创建迁移脚本：
+2.创建迁移脚本：
 ```
 (venv) $ python hello.py db migrate -m "initial migration"
 ```
@@ -328,7 +328,7 @@ UserWarning: SQLALCHEMY_TRACK_MODIFICATIONS adds significant overhead and will b
 ```
 消除warning的方法：修改`venv/lib/python2.7/site-packages/flask_sqlalchemy/__inin__.py`第797行，将`track_modifications = app.config.setdefault('SQLALCHEMY_TRACK_MODIFICATIONS', None)`中的`None`改成`True`。
 
-3. 更新数据库：
+3.更新数据库：
 ```
 (venv) $ python hello.py db upgrade
 ```
