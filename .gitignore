@@ -37,8 +37,3 @@ captures/
 # python compile files
 *.pyc
 
-# picture
-*.png
-*.jpg
-*.bmp
-*.jpeg
