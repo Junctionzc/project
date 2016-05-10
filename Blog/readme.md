@@ -161,6 +161,7 @@ SQLAlchemy是一个数据库抽象层代码包，初步理解是为多种数据�
 1. 安装Flask-SQLAlchemy:`(venv) $ pip install flask-sqlalchemy`
 
 **定义模型**
+
 ![](sqlite-example.png)
 
 示例，定义Role和User模型：
