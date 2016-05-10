@@ -205,21 +205,21 @@ class User(db.Model):
 
 **数据库操作**
 
-1. 创建表：
+1.创建表：
 ```
 启动python shell：
 (venv) $ python hello.py shell
 >>> from hello import db
 >>> db.create_all()
 ```
-2. 添加一些角色和用户：
+2.添加一些角色和用户：
 ```
 >>> from hello import Role, User
 >>> admin_role = Role(name = 'Admin')
 >>> user_role = Role(name = 'User')
 >>> user_john = User(username = 'susan', role = user_role)
 ```
-3. 添加到会话并提交会话以把对象写入数据库：
+3.添加到会话并提交会话以把对象写入数据库：
 ```
 >>> db.session.add(admin_role)
 >>> db.session.add(user_role)
@@ -227,12 +227,12 @@ class User(db.Model):
 >>> db.session.commit()
 ```
 
-4. 查询行：
+4.查询行：
 ```
 >>> Role.query.all()
 >>> User.query.all()
 ```
-5. 通过过滤器更精确查询行：
+5.通过过滤器更精确查询行：
 ```
 >>> User.query.filter_by(role=user_role).all()
 ```
