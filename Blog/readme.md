@@ -335,3 +335,51 @@ UserWarning: SQLALCHEMY_TRACK_MODIFICATIONS adds significant overhead and will b
 ```
 
 <font color='color'>注意：以上数据库的迁移我执行后有问题，貌似创建的时候就出问题了，恢复不了，暂时不清楚为什么。</font>
+
+## **chapter 6**
+### **电子邮件**
+
+相对来说这一章比较简单
+
+在程序中发送电子邮件：
+```
+from flask.ext.mail import Message
+
+app.config['MAIL_SERVER'] = 'smtp.163.com'
+app.config['MAIL_PORT'] = 25
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['FLASKY_MAIL_SUBJECT_PREFIX'] = '[Flasky]'
+app.config['FLASKY_MAIL_SENDER'] = os.environ.get('MAIL_SENDER')
+app.config['FLASKY_ADMIN'] = os.environ.get('FLASKY_ADMIN')
+
+def send_async_email(app, msg):
+    with app.app_context():
+        mail.send(msg)
+
+def send_email(to, subject, template, **kwargs):
+    msg = Message(app.config['FLASKY_MAIL_SUBJECT_PREFIX'] + subject, 
+                  sender = app.config['FLASKY_MAIL_SENDER'], recipients=[to])
+    msg.body = render_template(template + '.txt', **kwargs)
+    msg.html = render_template(template + '.html', **kwargs)
+    thr = Thread(target = send_async_email, args = [app, msg])
+    thr.start()
+    return thr
+    
+@app.route('/', methods = ['GET', 'POST'])
+def index():
+    form = NameForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username = form.name.data).first()
+        if user is None:
+            # ...
+            if app.config['FLASKY_ADMIN']:
+                send_email(app.config['FLASKY_ADMIN'], 'New User',
+                           'mail/new_user', user = user)
+            # ...
+```
+
+发送邮件移到线程里面去执行，缺点是每一个邮件都要新建一个线程不太合适，改进方法是将`send_async_email()`函数的操作发给Celery任务队列。
+
+<font color='red'>上面使用了网易的smtp服务器，偶尔能发送成功，经常抽风，不知道为什么，账户、密码、发件邮箱地址、收件邮箱地址都从环境变量中读入。</font>
