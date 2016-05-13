@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "curl/include/curl/curl.h"
-#include "cJSON/cJSON.h"
+#include "utility/curl/include/curl/curl.h"
+#include "utility/cJSON/cJSON.h"
 
 int read_appid_from_file(char *filename, char *appid);
 size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream);

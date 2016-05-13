@@ -1,12 +1,13 @@
 CC = gcc
 
-CFLAGS += -I./curl/include/curl
+CFLAGS += -I./utility/curl/include/curl \
+          -I./utility/cJSON
 
 LDFLAGS = -L./curl/lib
 
 LINK := -lcurl -lm
 
-SRC_FILES := ./cJSON/cJSON.c \
+SRC_FILES := ./utility/cJSON/cJSON.c \
              ./get_weather.c
 
 APP = get_weather
