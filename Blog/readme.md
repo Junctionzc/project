@@ -387,3 +387,125 @@ def index():
 ## **chapter 7**
 ### **大型程序的结构**
 <font color='red'>第一次看这章，看得云里雾里，蓝本的概念不知道讲的什么。对整个结构理解很乱，这种感觉就像按照前面的步骤装好了一个玩具，然后把它拆散，再装一个功能一样但外形不一样的玩具，模块与模块之间怎么耦合一下子完全没有概念。</font>
+
+前后来回看了5次这章，终于稍微清晰了一点，目录结构如下：
+```
+.
+├── app
+│   ├── email.py
+│   ├── __init__.py
+│   ├── main
+│   │   ├── errors.py
+│   │   ├── forms.py
+│   │   ├── __init__.py
+│   │   └── views.py
+│   ├── models.py
+│   ├── static
+│   │   └── favicon.ico
+│   └── templates
+│       ├── 404.html
+│       ├── 500.html
+│       ├── base.html
+│       ├── index.html
+│       ├── mail
+│       │   ├── new_user.html
+│       │   └── new_user.txt
+│       └── user.html
+├── config.py
+├── manage.py
+├── migrations
+│   ├── alembic.ini
+│   ├── env.py
+│   ├── README
+│   ├── script.py.mako
+│   └── versions
+├── readme.md
+├── requirements.txt
+├── sqlite-example.png
+└── tests
+    ├── __init__.py
+    └── test_basics.py
+```
+大致调用关系图如下：
+![](call.png)
+
+总体来说这章讲得有点混乱，要多读几次，但其实结构也不是很复杂。暂时理解蓝本的作用：在创建app之后定义路由。
+
+**一些需要注意的地方：**
+
+1.配置可以使用Flask app.config配置提供的from_object()方法直接导入程序：
+```
+def create_app(config_name):
+    app = Flask(__name__)
+    app.config.from_object(config[config_name])
+    config[config_name].init_app(app)
+    # ...
+```
+其中`config[config_name].init_app(app)`当前定义为空。
+
+书中未给出的几个文件源码如下：
+
+app/email.py:
+```
+from threading import Thread
+from flask.ext.mail import Mail
+from flask.ext.mail import Message
+from flask import current_app, render_template
+from . import mail
+
+def send_async_email(app, msg):
+    with app.app_context():
+        mail.send(msg)
+
+def send_email(to, subject, template, **kwargs):
+    app = current_app._get_current_object()
+    msg = Message(app.config['FLASKY_MAIL_SUBJECT_PREFIX'] + subject, 
+                  sender = app.config['FLASKY_MAIL_SENDER'], recipients=[to])
+    msg.body = render_template(template + '.txt', **kwargs)
+    msg.html = render_template(template + '.html', **kwargs)
+    thr = Thread(target = send_async_email, args = [app, msg])
+    thr.start()
+    return thr
+```
+**以上要注意的一点是`from flask import current_app`和`app = current_app._get_current_object()`这一句，原来的直接引用app在这里会报错，因为app未定义，app/main/views.py里面的app也要改成current_app。current_app应该是程序上下文，还不怎么理解。**
+
+app/models.py:
+```
+from . import db
+
+class Role(db.Model):
+    __tablename__ = 'roles'
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(64), unique = True)
+    users = db.relationship('User', backref = 'role', lazy = 'dynamic')
+    
+    def __repr__(self):
+        return '<Role %r>' % self.name
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key = True)
+    username = db.Column(db.String(64), unique = True, index = True)
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    
+    def __repr__(self):
+        return '<User %r>' % self.username
+```
+
+程序默认使用`DevelopmentConfig`配置，数据库需要自己创建，但这个目录结构在shell中创建数据库非常麻烦，因为db未初始化，这跟之前的第5章不同。这里直接使用第5章的数据库文件就ok，名字改成`data-dev.sqlite`。
+
+在运行时需要设置的环境变量（Linux系统，替换下面的*，但是没什么卵用，163邮箱继续抽风）：
+```
+export MAIL_SENDER=*****
+export FLASKY_ADMIN=*****
+export MAIL_USERNAME=*****
+export MAIL_PASSWORD=*****
+```
+
+最后的单元测试看不太懂，主要是程序上下文的理解。`setUp()`和`tearDown()`方法分别在测试前后运行，以test开头的方法都是测试方法。以下这句测试的是什么？
+```
+self.assertTrue(current_app.config['TESTING'])
+```
+书中一句带过，`确保程序在测试配置中运行`？
+
+关于单元测试的更多内容，可以参考这里：http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000/00140137128705556022982cfd844b38d050add8565dcb9000

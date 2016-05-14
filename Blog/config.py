@@ -20,7 +20,7 @@ class DevelopmentConfig(Config):
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
-        'sqlite:///' + os.path.john(basedir, 'data-dev.sqlite')
+        'sqlite:///' + os.path.join(basedir, 'data-dev.sqlite')
         
 class TestingConfig(Config):
     TESTING = True
@@ -35,5 +35,6 @@ config = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
     'production': ProductionConfig,
+    
     'default': DevelopmentConfig
 }
