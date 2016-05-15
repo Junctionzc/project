@@ -502,6 +502,16 @@ export MAIL_USERNAME=*****
 export MAIL_PASSWORD=*****
 ```
 
+******
+**2016年5月15日更新**
+
+找到原因了，邮件发不出去是因为网易smtp服务器把这当成了垃圾邮件，看这错误：
+```
+SMTPDataError: (554, 'DT:SPM 163 smtp9,DcCowABnlycHFDhXNLdrAA--.30082S3 1463292937,please see http://mail.163.com/help/help_spam_16.htm?）
+```
+貌似网易还会封一段时间ip（晕）。
+******
+
 最后的单元测试看不太懂，主要是程序上下文的理解。`setUp()`和`tearDown()`方法分别在测试前后运行，以test开头的方法都是测试方法。以下这句测试的是什么？
 ```
 self.assertTrue(current_app.config['TESTING'])
