@@ -519,3 +519,11 @@ self.assertTrue(current_app.config['TESTING'])
 书中一句带过，`确保程序在测试配置中运行`？
 
 关于单元测试的更多内容，可以参考这里：http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000/00140137128705556022982cfd844b38d050add8565dcb9000
+
+## **chapter 8**
+### 用户认证
+
+记得import RegistrationForm
+```
+from .forms import LoginForm, RegistrationForm
+```
