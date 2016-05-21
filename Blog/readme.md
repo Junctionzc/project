@@ -336,6 +336,24 @@ UserWarning: SQLALCHEMY_TRACK_MODIFICATIONS adds significant overhead and will b
 
 <font color='color'>注意：以上数据库的迁移我执行后有问题，貌似创建的时候就出问题了，恢复不了，暂时不清楚为什么。</font>
 
+*****
+**2016年5月21日更新**
+
+学完第9章，终于解决了数据库迁移的问题，在这之前，一直用书本git仓库的数据库（--!）
+
+数据库迁移框架的作用是当你修改了数据库的模型，比如增加了某一列，不要影响原来的数据，还可以备份原来的数据库模型。
+
+之前按照书本创建迁移脚本，一直提示这个：
+```
+INFO  [alembic.env] No changes in schema detected.
+```
+
+书中有这么一行字：
+>自动创建的迁移会根据模型定义和数据库当前之间的差异生成upgrade()和downgrade()函数的内容。
+
+**意思是说当数据库模型没有被更改，是创建不了迁移脚本的。所以第5章创建迁移脚本的正确打开方式是：先不用管，待到后面修改了Role和User模型再来运行迁移脚本和更新数据库即可**
+*****
+
 ## **chapter 6**
 ### **电子邮件**
 
@@ -510,6 +528,10 @@ export MAIL_PASSWORD=*****
 SMTPDataError: (554, 'DT:SPM 163 smtp9,DcCowABnlycHFDhXNLdrAA--.30082S3 1463292937,please see http://mail.163.com/help/help_spam_16.htm?）
 ```
 貌似网易还会封一段时间ip（晕）。so，暂时把邮件功能屏蔽掉，看来邮件这个问题是个不小的问题啊。
+
+**2016年5月19日更新**
+
+邮箱改成QQ邮箱，发送邮件ok，注意密码不是QQ密码，需要在邮箱设置里面开通SMTP服务，然后生成一个授权码，这个授权码才是密码。
 ******
 
 最后的单元测试看不太懂，主要是程序上下文的理解。`setUp()`和`tearDown()`方法分别在测试前后运行，以test开头的方法都是测试方法。以下这句测试的是什么？
@@ -523,7 +545,136 @@ self.assertTrue(current_app.config['TESTING'])
 ## **chapter 8**
 ### 用户认证
 
-记得import RegistrationForm
+**密码安全性**
+
+不能以明文存储密码，如果网站受到攻击，被人脱裤了，所有用户密码都会暴露，要存储密码生成的散列值。散列值不能反推出密码，但可以用来验证密码。实现以上功能可以使用Werkzeug的security模块。
+
+
+**创建认证蓝本**
+
+注册蓝本：`app.register_blurprint(auth_blueprint, url_prefix = '/auth')`
+
+>`url_prefix`是可选参数，如果使用，注册后蓝本中定义的所有路由都会加上指定前缀。
+
+**使用Flask-Login认证用户**
+>Flask-Login专门用来管理用户认证系统中的认证状态，且不依赖特定的认证机制。
+
+安装Flask-Login扩展：`(venv) $ pip install flask-login`
+
+要使用Flask-Login扩展，程序的User模型需要实现`is_authenticated`、`is_active`、`is_anonymous`、`get_id()`4个方法，一种简单的替代方案是在User模型传入一个Flask-Login提供的`UserMinxin`类，其中包含这些方法的默认实现：
+```
+from flask.ext.login import UserMixin
+
+class User(UserMiXin, db.Model):
+    # ...
+```
+
+Flask-Login在程序的工厂函数中初始化：
+
+`app/__init__.py:`
+```
+from flask.ext.login import LoginManager
+
+login_manager = LoginManager()
+login_manager.session_protection = 'strong'
+login_manager.login_view = 'auth.login'
+
+def create_app(config_name):
+    # ...
+    login_manager.init_app(app)
+    # ...
+```
+
+login_view属性设置登录页面的端点，因登录路由在蓝本中定义，因此要在前面加上蓝本的名字。
+
+>为了保护路由只让认证用户访问，Flask-Login提供了一个login_required修饰器，用法演示如下：
+
+```
+from flask.ext.login import login_required
+
+@app.route('/secret')
+@login_required
+def secret():
+    return 'Only authenticated users are allowed!'
+```
+
+关于这句代码的解释：
+```
+return redirect(request.args.get('next') or url_for('main.index'))
+```
+
+>用户访问未授权的URL时会显示登录表单，Flask-Login会把原地址保存在查询字符串的next参数中，这个参数可从request.args字典中读取。如果查询字符串中没有next参数，则重定向到首页。
+
+**注册新用户**
+
+`app/auth.forms.py:`
+
+```
+class RegistrationForm(Form):
+    # ...
+    def validate_email(self, field):
+        # ...
+    def validate_username(self, field):
+        # ...
+```
+
+>如果表单类中定义了以validate_开头且后面跟着字段名的方法，这个方法就和常规的验证函数一起调用。自定义的验证函数要想表示验证失败，可以抛出ValidationError异常，其参数就是错误信息。
+
+记得在用户注册路由`app/auth/views.py`中`import RegistrationForm`
 ```
 from .forms import LoginForm, RegistrationForm
 ```
+
+**确认账户**
+
+确认邮件中最简单的确认链接是`http://www.example.com/auth/confirm/<id>`这种形式的URL，但这样很不安全，任何人都可以伪造这个链接帮别的用户确认邮件地址。一种解决方法是把令牌发过去，令牌可以设置过期时间。一个示例：
+
+```
+(venv) $ python manage.py shell
+>>> from manage import app
+>>> from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+>>> s = Serializer(app.config['SECRET_KEY'], expires_in = 3600)
+>>> token = s.dumps({'confirm': 23 })
+>>> token
+'eyJhbGciOiJIUzI1NiIsImV4cCI6MTM4MTcxODU1OCwiaWF0IjoxMzgxNzE0OTU4fQ.ey ...'
+>>> data = s.loads(token)
+>>> data
+{u'confirm': 23}
+```
+
+>itsdangerous提供多种生成令牌的方法，`TimedJSONWebSignatureSerializer`类生成具有过期时间的JSON Web签名。dumps()方法为指定的数据生成一个加密签名，然后再对数据和签名进行序列化，生成令牌字符串。loads()方法用于解码令牌。
+
+>若想着蓝本中使用针对程序全局请求的钩子，必须使用`before_app_request`修饰器。
+
+示例8-22的'static'后面应该是'\'，另外这两句没怎么看懂：
+```
+and request.endpoint[:5] != 'auth.' \
+and request.endpoint != 'static'
+```
+
+
+**管理用户**
+修改密码、重设密码、修改电子邮件地址这部分都是些体力活，主要步骤：
+
+* 在`app/auth/forms.py`中定义表单相应的类
+* 在`app/auth/views.py`中添加相应的路由
+* 增加相应的页面模板
+
+## **chapter 9**
+### 用户角色
+
+学完这章终于对数据库迁移有了比较清晰的认识，也解决了之前的数据库迁移失败的问题。关于数据库迁移的说明，更新到了上面的第5章，这里不再重复。
+
+**这章的正确打开方式是：修改了Role模型，先运行`python manage.py db upgrade`迁移数据库，然后再把角色写入数据库：**
+
+```
+(venv) $ python manage.py shell
+>>> Role.insert_roles()
+>>> Role.query.all()
+[<Role u'Administrator'>, <Role u'User'>, <Role u'Moderator'>]
+```
+
+`app/decorators.py`的自定义修饰器没怎么看懂，先跳过。
+
+至此，也终于把两个一直没有解决的问题“邮件”和“数据库迁移”都解决了，理解第7章到第9章，整整花了一周的时间，今天星期六，感觉我确实该休息一下了。
+
