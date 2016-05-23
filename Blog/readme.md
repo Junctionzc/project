@@ -678,3 +678,60 @@ and request.endpoint != 'static'
 
 至此，也终于把两个一直没有解决的问题“邮件”和“数据库迁移”都解决了，理解第7章到第9章，整整花了一周的时间，今天星期六，感觉我确实该休息一下了。
 
+## **chapter 10**
+### 用户资料
+
+**资料信息**
+
+>db.String和db.Text的区别在于后者不需要指定最大长度
+
+一些需要注意的地方：
+
+* 需要在`app/models.py`中引入`datetime`：
+```
+from datetime import datetime
+```
+
+**用户资料页面**
+
+一些需要注意的地方：
+
+* 需要在`app/main/views.py`中引入`User`:
+```
+from ..models import User
+```
+
+需要引入的模块根据错误修改，对比原来flask仓库对应的版本，后面不再重复写这些繁琐的部分。
+
+* 更改了模型之后先要创建迁移脚本，再更新数据库模型:
+```
+python manage.py db migrate -m "xxxx"
+python manage.py db upgrade
+```
+
+**资料编辑器**
+
+>WTForms对HTML表单控件select进行SelectField包装，从而实现下拉列表，用来在这个表单中选择用户角色。SelectField实例必须在其choices属性中设置各选项。选项必须是一个由元组组成的列表，各元组都包含两个元素：选项的标识符和显示在控件中的文本字符串。
+
+>用于选择用户角色的SelectField，设定这个字段的初始值时，role_id被赋值给field.role.data，表单提交后，id从字段的data属性中提取。表单中声明SelectField时使用`coerce=int`参数保证这个字段的data属性值是整数。
+
+*****
+**2016年5月22日 21：45 星期天**
+
+跟着书本编，最主要的问题还是变量名字拼写错误，出现些奇奇怪怪的问题，比如将`insert_roles()`方法中的`role.permissions`写成`role.permission`，设置角色的时候出现错误，debug了一晚上。
+*****
+
+**用户头像**
+
+`www.gravatar.com`被墙了，改成没被墙的`cn.gravatar.com/avatar`。
+
+自定义的`styles.css`要在`base.html`模板中引用：
+```
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+```
+
+效果图如下：
+
+![](user-profile.png)
+
+感觉还不错哦，^_^
