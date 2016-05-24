@@ -735,3 +735,36 @@ python manage.py db upgrade
 ![](user-profile.png)
 
 感觉还不错哦，^_^
+
+## **chapter 11**
+### **博客文章**
+
+这句话没怎么看懂：
+>变量current_user由Flask-Login提供，和所有上下文变量一样，也是通线程内的代理对象实现。这个对象的表现类似用户对象，但实际上却是一个轻度包装，包含真正的用户对象。数据库需要真正的用户对象，因此要调用`_get_current_object()`方法。
+
+书本中的`app/templates/index.html`源码样式有点问题，原来是这样：
+```
+    # ...
+    <div class="post-data">...</div>
+    <div class="post-author">...</div>
+    <div class="post-body">...</div>
+    # ...
+```
+改成：
+```
+    # ...
+    <div class="post-content">
+        <div class="post-data">...</div>
+        <div class="post-author">...</div>
+        <div class="post-body">...</div>
+    </div>
+    # ...
+```
+
+**分页显示长博客文章列表**
+
+使用ForgeryPy生成虚拟信息：`(venv) $ pip install forgerypy`
+
+`User.generate_fake(xxx)`用于生成大量虚拟用户，`Post.generate_fake(xxx)`用于生成大量虚拟文章。
+
+<font color="red">分页模板宏太长太长，第一次看没怎么看懂啊。</font>

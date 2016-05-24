@@ -5,7 +5,6 @@ from .. import db
 from ..models import User
 from .forms import LoginForm, RegistrationForm, ChangePasswordForm, \
                    PasswordResetRequestForm, PasswordResetForm, ChangeEmailForm
-from flask.ext.login import current_user
 from ..email import send_email
 
 @auth.route('/login', methods=['GET', 'POST'])
