@@ -768,3 +768,32 @@ python manage.py db upgrade
 `User.generate_fake(xxx)`用于生成大量虚拟用户，`Post.generate_fake(xxx)`用于生成大量虚拟文章。
 
 <font color="red">分页模板宏太长太长，第一次看没怎么看懂啊。</font>
+
+要像书本那样显示Markdown预览，需要在`app/static/styles.css`中定义样式，暂时还不知道这是怎么起作用的：
+```
+div.flask-pagedown-preview {
+    margin: 10px 0px 10px 0px;
+    border: 1px solid #e0e0e0;
+    padding: 4px;
+}
+div.flask-pagedown-preview h1 {
+    font-size: 140%;
+}
+div.flask-pagedown-preview h2 {
+    font-size: 130%;
+}
+div.flask-pagedown-preview h3 {
+    font-size: 120%;
+}
+.post-body h1 {
+    font-size: 140%;
+}
+.post-body h2 {
+    font-size: 130%;
+}
+.post-body h3 {
+    font-size: 120%;
+}
+```
+
+`从CDN中加载所需文件`是什么鬼？
