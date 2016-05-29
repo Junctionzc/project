@@ -183,6 +183,11 @@ class User(UserMixin, db.Model):
     
     def is_followed_by(self, user):
         return self.followers.filter_by(follower_id = user.id).first() is not None
+
+    @property
+    def followed_posts(self):
+        return Post.query.join(Follow, Follow.followed_id == Post.author_id) \
+            .filter(Follow.follower_id == self.id)
     
     def __repr__(self):
         return '<User %r>' % self.username
@@ -196,6 +201,7 @@ class User(UserMixin, db.Model):
                 self.role = Role.query.filter_by(default = True).first()
         if self.email is not None and self.avatar_hash is None:
             self.avatar_hash = hashlib.md5(self.email.encode('utf-8')).hexdigest()
+        self.follow(self)
 
     @staticmethod
     def generate_fake(count = 100):
@@ -219,6 +225,14 @@ class User(UserMixin, db.Model):
             except IntegrityError:
                 db.session.rollback()
                 
+    @staticmethod
+    def add_self_follows():
+        for user in User.query.all():
+            if not user.is_following(user):
+                user.follow(user)
+                db.session.add(user)
+                db.session.commit()
+
 class Post(db.Model):
     __tablename__ = 'posts'
     id = db.Column(db.Integer, primary_key = True)
@@ -249,7 +263,7 @@ class Post(db.Model):
                         'h1', 'h2', 'h3', 'p']
         target.body_html = bleach.linkify(bleach.clean(
             markdown(value, output_format='html'),
-            tags=allowed_tags, strip = True))
+            tags=allowed_tags, strip = True))            
             
 db.event.listen(Post.body, 'set', Post.on_changed_body)
 

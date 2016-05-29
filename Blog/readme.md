@@ -830,6 +830,69 @@ Markdown()文本到HTML转换分三步完成：
 **2016年5月26日**
 
 第一次看数据库关系这部分很难理解，有种完全看不进去的感觉，也有可能是最近太累啦，因为工作问题最近情绪太过波动，晚上下班之后就明显感觉到疲惫，智商不够用啊，但很显然，这一次，躺都要躺完的。不懂就先跳过，准备二刷。
+
+**2016年5月29日**
+
+高级多对多这一节的催眠能力实在是太强了，前后来回翻，睡着了3遍，还是没有看懂。。。
 *****
 
 >关联表就是一个简单的表，不是模型，SQLAlchemy会自动接管这个表。
+
+高级多对多关系一下子理解起来很难，主要是`follower`和`followed`太像了，需要好好理清两者的关系。经过反复、来回看，应该先从表和页面从上到下开始理解：
+
+先看代码定义的Follow模型：
+```
+class Follow(db.Model):
+    __tablename__ = 'follows'
+    follower_id = db.Column(db.Integer, db.ForeignKey('users.id'),
+                            primary_key = True)
+    followed_id = db.Column(db.Integer, db.ForeignKey('users.id'),
+                            primary_key = True)
+    timestamp = db.Column(db.DateTime, default = datetime.utcnow)    
+```
+
+假设当前的users表是这样的：
+
+|id  |username|
+|----|--------|
+|1   |john    |
+|2   |susan   |
+|3   |david   |
+
+follows表是这样的：
+
+|follower_id|followed_id|
+|-----------|-----------|
+|1          | 3         |
+|2          | 1         |
+|2          | 3         |
+
+这表明john关注了david，susan关注了john和david。
+
+现在分析一下上面这个表的第一行是怎么添加进来的：
+
+假设现在john还没有关注david，准备在david的主页上点击Follow按钮，点击后视图函数主要执行`current_user.follow(user)`这句，其中，`current_user`就是john，`user`是david，然后再来看User的follow()方法：
+```
+class User(db.Model):
+    # ...
+    def follow(self, user):
+        if not self.is_following(user):
+            f = Follow(follower = self, followed = user)
+            db.session.add(f)
+```
+其中follower和followed属性是在User模型中向Follow模型中添加的（可以参考5.7节——关系）：
+```
+class User(UserMinxin, db.Model):
+    followed = db.relationship('Follow', 
+                               foreign_keys = [Follow.follower_id],
+                               backref = db.backref('follower', lazy = 'joined'),
+                               lazy = 'dynamic',
+                               cascade = 'all, delete-orphan')
+    followers = db.relationship('Follow',
+                                foreign_keys = [Follow.followed_id],
+                                backref = db.backref('followed', lazy = 'joined'),
+                                lazy = 'dynamic',
+                                cascade = 'all, delete-orphan')
+    
+```
+核心的这句`Follow(follower = self, followed = user)`表明，follower是john，followed是david。后面的取消关注、查询可以按照这个开始理解。
