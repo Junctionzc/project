@@ -761,15 +761,38 @@ python manage.py db upgrade
     # ...
 ```
 
+将博客文章的模板移到`_posts.html`中，然后利用Jinja2提供的include()指令引入，避免重复维护两个完全相同的HTML片段。
+```
+{% include '_post.html' %}
+```
+
 **分页显示长博客文章列表**
 
 使用ForgeryPy生成虚拟信息：`(venv) $ pip install forgerypy`
 
 `User.generate_fake(xxx)`用于生成大量虚拟用户，`Post.generate_fake(xxx)`用于生成大量虚拟文章。
 
+offset查询过滤器，会跳过参数中指定的记录数量：
+```
+User.query.offset(randint(0, user_count - 1)).first()
+```
+
+Flask-SQLAlchemy提供一个paginate()方法，返回一个Pagination类对象，用于分页查询数据，该对象包含很多的属性，比如items属性，返回当前页面中的记录。
+
+*****
 <font color="red">分页模板宏太长太长，第一次看没怎么看懂啊。</font>
 
-要像书本那样显示Markdown预览，需要在`app/static/styles.css`中定义样式，暂时还不知道这是怎么起作用的：
+**2016年5月28日更新**
+
+关于分页模板模板宏，认真分析一下就理解了，主要是调用Pagination类对象的几个方法。
+
+>Jinja2宏的参数列表中不用加入**kwargs即可接收关键字参数，分页宏把接收到的所有关键字参数都传给了生成分页链接的url_for()方法。
+
+*****
+
+**使用Markdown和Flask-PageDown支持富文本文章**
+
+要像书本那样显示Markdown预览，需要在`app/static/styles.css`中定义样式，不然那个外边框是没有的，
 ```
 div.flask-pagedown-preview {
     margin: 10px 0px 10px 0px;
@@ -785,15 +808,28 @@ div.flask-pagedown-preview h2 {
 div.flask-pagedown-preview h3 {
     font-size: 120%;
 }
-.post-body h1 {
-    font-size: 140%;
-}
-.post-body h2 {
-    font-size: 130%;
-}
-.post-body h3 {
-    font-size: 120%;
-}
 ```
+以上这几个class没有单独引入就生效了，估计是Flask-PageDown内置的预定义名称。
 
-`从CDN中加载所需文件`是什么鬼？
+google了一下，CDN是内容分发网络的意思，书本上的意思是很多样式都是从CDN加载的，我试了一下断网，发现样式基本上全变了，看来没网是不行的。
+
+>安全起见，最好只提交Markdown源文本，在服务器上使用Markdown将其转换成HTML。
+
+markdown实时预览是通过SQLAlchemy的"set"事件监听程序实现的。
+
+Markdown()文本到HTML转换分三步完成：
+* 使用markdown()函数把Markdown文本转换成HTML。
+* 使用Blench的clean()函数删除所有不在白名单的标签。
+* 使用Blench的linkify()函数将纯文本中的URL转换成适当的`<a>`链接。
+
+“博客文章的固定链接”和“博客文章编辑器”没什么可说的，跟着书一步步来就能理解。
+
+## **chapter 12**
+### **关注者**
+*****
+**2016年5月26日**
+
+第一次看数据库关系这部分很难理解，有种完全看不进去的感觉，也有可能是最近太累啦，因为工作问题最近情绪太过波动，晚上下班之后就明显感觉到疲惫，智商不够用啊，但很显然，这一次，躺都要躺完的。不懂就先跳过，准备二刷。
+*****
+
+>关联表就是一个简单的表，不是模型，SQLAlchemy会自动接管这个表。
