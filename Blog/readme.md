@@ -896,3 +896,18 @@ class User(UserMinxin, db.Model):
     
 ```
 核心的这句`Follow(follower = self, followed = user)`表明，follower是john，followed是david。后面的取消关注、查询可以按照这个开始理解。
+
+## **chapter 13**
+### **用户评论**
+
+**提交和显示评论**
+
+评论和博客文章的处理差不多。
+
+关于URL片段的理解：
+```
+<a href="{{ url_for('.post', id=post.id )}}#comments">
+    <span class="label label-primary">{{ post.comments.count() }} Comments</span>
+</a>
+```
+效果是当点击了评论的链接，浏览器的滚动条会自动定位html元素`id="comments"`的位置，这里是评论区的位置。
