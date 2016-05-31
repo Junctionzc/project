@@ -1,13 +1,13 @@
-"""add comments
+"""add comment
 
-Revision ID: 48c18447d0fa
+Revision ID: 1080b8a7b02c
 Revises: da3a533016cc
-Create Date: 2016-05-30 09:21:00.555959
+Create Date: 2016-05-31 12:43:40.620211
 
 """
 
 # revision identifiers, used by Alembic.
-revision = '48c18447d0fa'
+revision = '1080b8a7b02c'
 down_revision = 'da3a533016cc'
 
 from alembic import op
@@ -21,7 +21,7 @@ def upgrade():
     sa.Column('body', sa.Text(), nullable=True),
     sa.Column('body_html', sa.Text(), nullable=True),
     sa.Column('timestamp', sa.DateTime(), nullable=True),
-    sa.Column('diabled', sa.Boolean(), nullable=True),
+    sa.Column('disabled', sa.Boolean(), nullable=True),
     sa.Column('author_id', sa.Integer(), nullable=True),
     sa.Column('post_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['author_id'], ['users.id'], ),

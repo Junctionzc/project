@@ -911,3 +911,16 @@ class User(UserMinxin, db.Model):
 </a>
 ```
 效果是当点击了评论的链接，浏览器的滚动条会自动定位html元素`id="comments"`的位置，这里是评论区的位置。
+
+**管理评论**
+
+可以通过Jinja2提供的set指令定义模板变量，传给从属模板，用以控制是否渲染某些HTML元素。
+
+这一小节我遇到了自己给自己挖的一个坑，之前将Comment模型中的`disabled`列名称打漏一个字母成`diabled`，管理评论点击`Enable/Disable`按钮一直没有反应。发现问题之后改过来，重新创建数据库迁移脚本并更新数据库，结果报错，在`stackoverflow`上面找到相关问题，原来SQLite不支持删除列：http://stackoverflow.com/questions/30394222/why-flask-migrate-cannot-upgrade-when-drop-column ，虽然可以绕过，但方法看起来非常麻烦，经过一番实践，我自己的解决思路如下（过程任何一步需要覆盖文件之前先备份）：
+
+* 拷贝添加Comment模型之前版本的数据库文件data-dev.sqlite（我在另一个目录下clone了github的仓库，在这个clone的文件夹中回退到之前版本，再把数据库文件拷贝出来）。
+* 删除migrations/versions中添加Comment模型之后的迁移脚本（与上一步历史版本的migrations/versions下的文件作对比，多出来的就是要删除的）。
+* 将拷贝出来的数据库文件覆盖当前的数据库文件。
+* 重新创建迁移脚本并更新数据库。
+
+打漏字母引发的血案，另外Git真是个好工具。
