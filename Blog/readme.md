@@ -924,3 +924,53 @@ class User(UserMinxin, db.Model):
 * 重新创建迁移脚本并更新数据库。
 
 打漏字母引发的血案，另外Git真是个好工具。
+
+## **chapter 14**
+### **应用编程接口**
+
+**使用Flask提供REST Web服务**
+>为所有客户端生成适当响应的一种方法是，在错误处理程序中根据客户端请求的格式改写响应，这种技术称为内容协商。
+
+**使用Flask-HTTPAuth认证用户**
+>在REST Web服务中使用cookie并不是一个很好的设计选择。
+
+>？验证回调函数把通过认证的用户保存在Flask的全局对象g中，如此一来，视图函数便能进行访问。
+
+蓝本中的所有路由都要使用相同的方式进行保护，可以在`before_request`处理程序中使用一次`login_required`修饰器。
+
+`app/api_1_0/authentication.py`
+```
+@api.before_request
+@auth.login_required
+def before_request():
+    if not g.current_user.is_anonymous and \
+            not g.current_user.confirmed:
+        return forbidden('Unconfirmed account')
+```
+没有上面一一段代码会报错：
+```
+AttributeError: '_AppCtxGlobals' object has no attribute 'current_user'
+```
+
+**资源和JSON的序列化转换**
+>`url_for()`方法指定参数`_external = True`参数可以生成完整URL。
+
+>表示资源时可以使用虚构的属性。
+
+>提供给客户端的资源表示没必要和数据库模型的内部表示完全一致。
+
+*****
+**2016年6月5日 星期天**
+
+早上等公交车的时候，差点被掉下来的树枝砸到了，当时就站在箭头的位置，算大难不死吗[笑哭]：
+
+![](what.png)
+*****
+
+**使用HTTPie测试Web服务**
+
+发现jsonify()会对传入的JSON键自动排序，返回的数据跟书本对比看了半天没发现有"next"和"count"的键值对，原来在前面。
+
+![](api-get.png)
+
+shell中发起请求，http://127.0.0.1:5000/api/v1.0/posts/ 最后面的`/`必须要有，不然会提示需要重定向，但在浏览器中打开会自动加上`/`，我记得好像书本哪里提到过。
