@@ -37,3 +37,5 @@ captures/
 # python compile files
 *.pyc
 
+# ignore virtual environment
+venv/
