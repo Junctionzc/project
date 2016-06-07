@@ -974,3 +974,57 @@ AttributeError: '_AppCtxGlobals' object has no attribute 'current_user'
 ![](api-get.png)
 
 shell中发起请求，http://127.0.0.1:5000/api/v1.0/posts/ 最后面的`/`必须要有，不然会提示需要重定向，但在浏览器中打开会自动加上`/`，我记得好像书本哪里提到过。
+
+## **chapter 15**
+### **测试**
+
+**获取代码覆盖报告**
+
+Python提供了一个优秀的代码覆盖工具coverage: `(venv) $ pip install coverage`
+
+**Flask测试客户端**
+
+程序的某些代码严重依赖运行中的程序所创建的环境，Flask内建了一个测试客户端用于解决（至少部分解决）这一问题。
+
+测试Web程序：
+>FLASK-WTF生成的表单中包含一个隐藏字段，其内容是CSRF令牌，需要和表单中的数据一起提交，但是很繁琐，所以在测试中禁用CSRF保护功能。
+
+`config.py`
+```
+class TestingConfig(Config):
+    # ...
+    WTF_CSRF_ENABLED = False
+```
+
+>测试客户端的post()或get()方法的参数`follow_redirects=True`，可以让测试客户端和浏览器一样，自动向重定向的URL发起GET请求。
+
+测试Web服务：
+
+发现书本上的几个坑：
+
+`tests/test_api.py:`
+
+* 匿名请求`api.get_posts`是有文章数据返回的：
+```
+def test_no_auth(self):
+    response = self.client.get(url_for('api.get_posts'),
+                                content_type = 'application/json')
+    self.assertTrue(response.status_code == 401)
+```
+将`401`改成`200`
+
+* 估计是作者手抖写错的：
+```
+def test_posts(self):
+    # ...
+    response = self.client.post(
+        # ...
+        headers = self.get_auth_header('john@example.com', 'cat'),
+        # ...
+    
+    response = self.client.get(
+        # ...
+    headers = self.get_auth_header('john@example.com', 'cat'))
+        # ...
+```
+将`self.get_auth_header`改成`self.get_api_headers`
