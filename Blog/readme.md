@@ -1,6 +1,33 @@
 # Flask入门学习笔记
 **配合《Flask Web开发：基于Python的Web应用开发实战》学习**
 
+*****
+**6月9日**
+
+我使用`Visual Studio Code`打开此项目
+
+本地运行说明：
+
+* 在虚拟环境中下载依赖包：
+```
+(venv) $ pip install requirements/dev.txt
+```
+
+* shell中设置环境变量（替换*内容，主要用于邮件发送）：
+```
+export MAIL_SENDER=****
+export FLASKY_ADMIN=****
+export MAIL_USERNAME=****
+export MAIL_PASSWORD=****
+```
+
+* 执行单元测试：
+```
+python manage.py test
+```
+
+*****
+
 ## **chapter 1**
 ### 虚拟环境virtualenv
 1. 安装virtualenv包：`$ sudo apt-get install python-virtualenv`

@@ -39,3 +39,6 @@ captures/
 
 # ignore virtual environment
 venv/
+
+# ignore vscode environment
+.vscode/
