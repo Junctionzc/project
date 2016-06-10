@@ -20,10 +20,12 @@ alembic==0.8.6
 argparse==1.2.1
 bleach==1.4.3
 blinker==1.4
+coverage==4.1
 dominate==2.2.0
 html5lib==0.9999999
 itsdangerous==0.24
 python-editor==1.0
+selenium==2.53.5
 six==1.10.0
 visitor==0.1.2
 wsgiref==0.1.2

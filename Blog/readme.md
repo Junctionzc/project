@@ -986,14 +986,6 @@ AttributeError: '_AppCtxGlobals' object has no attribute 'current_user'
 
 >提供给客户端的资源表示没必要和数据库模型的内部表示完全一致。
 
-*****
-**2016年6月5日 星期天**
-
-早上等公交车的时候，差点被掉下来的树枝砸到了，当时就站在箭头的位置，算大难不死吗[笑哭]：
-
-![](what.png)
-*****
-
 **使用HTTPie测试Web服务**
 
 发现jsonify()会对传入的JSON键自动排序，返回的数据跟书本对比看了半天没发现有"next"和"count"的键值对，原来在前面。
@@ -1055,3 +1047,15 @@ def test_posts(self):
         # ...
 ```
 将`self.get_auth_header`改成`self.get_api_headers`
+
+使用Selenium进行端到端测试：
+
+大多数浏览器都支持自动化操作，Selenium是一个Web浏览器自动化工具，代替人工操作页面。
+
+安装Selenium：`(venv) $ pip install selenium`
+
+>使用Selenium进行的测试要求程序再Web服务器中运行，监听真实的HTTP请求。本节使用的方法是，让程序运行在后台线程里的开发服务器中，而测试运行在主线程。
+
+`setUpClass()`和`tearDownClass()`类方法分别在类的全部测试运行前、后执行，采用`@classmethod`修饰器修饰。
+
+没有包含数据库迁移，最后不用更新数据库吧。
