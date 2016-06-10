@@ -187,6 +187,8 @@ SQLAlchemy是一个数据库抽象层代码包，初步理解是为多种数据�
 
 1. 安装Flask-SQLAlchemy:`(venv) $ pip install flask-sqlalchemy`
 
+>配置对象有一个很有用的选项，即`SQLALCHEMY_COMMIT_ON_TEARDOWN`键，将其设为True时，每次请求结束后都会自动提交数据库中的变动。
+
 **定义模型**
 
 ![](sqlite-example.png)
@@ -296,8 +298,6 @@ def index():
         if user is None:
             user = User(username = form.name.data)
             db.session.add(user)
-            # 注意书中少的以下这句，经过测试，需要commit才能写入数据库
-            db.session.commit()
             session['known'] = False
         else:
             session['known'] = True
@@ -1059,3 +1059,17 @@ def test_posts(self):
 `setUpClass()`和`tearDownClass()`类方法分别在类的全部测试运行前、后执行，采用`@classmethod`修饰器修饰。
 
 没有包含数据库迁移，最后不用更新数据库吧。
+
+## **chapter 16**
+### **性能**
+
+影响性能的两个主要因素：
+
+* 数据库查询
+* 高CPU消耗
+
+如果程序性能随着时间推移不断降低，那很有可能是因为数据库查询变慢了，随着数据库规模的增长，这一情况还会变得更糟。
+
+Flask-SQLAlchemy提供了一个选项，可以记录请求中执行的与数据库查询相关的统计数字。
+
+性能分析一般在开发环境中进行，不建议在生产环境中进行分析。

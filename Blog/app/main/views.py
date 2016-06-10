@@ -6,6 +6,7 @@ from .forms import EditProfileForm, EditProfileAdminForm, PostForm, CommentForm
 from ..models import Role, User, Permission, Post, Comment
 from ..import db
 from ..decorators import permission_required, admin_required
+from flask.ext.sqlalchemy import get_debug_queries
 
 @main.route('/', methods = ['GET', 'POST'])
 def index():
@@ -30,7 +31,7 @@ def index():
     posts = pagination.items
     return render_template('index.html', form = form, posts = posts, 
                            show_followed = show_followed, pagination = pagination)
-    
+
 @main.route('/user/<username>')
 def user(username):
     user = User.query.filter_by(username = username).first()
@@ -235,4 +236,14 @@ def server_shutdown():
     if not shutdown:
         abort(500)
     shutdown()
-    return 'Shutting down...'                 
+    return 'Shutting down...'        
+
+@main.after_app_request
+def after_request(response):
+    for query in get_debug_queries():
+        if query.duration >= current_app.config['FLASKY_SLOW_DB_QUERY_TIME']:
+            current_app.logger.warning(
+                'Slow query: %s\nParameters: %s\nDuration: %fs\nContext: %s\n' % 
+                     (query.statement, query.parameters, query.duration, 
+                         query.context))
+    return response
