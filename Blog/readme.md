@@ -1,6 +1,10 @@
 # Flask入门学习笔记
 **配合《Flask Web开发：基于Python的Web应用开发实战》学习**
 
+完整部署版本在这里：
+
+https://github.com/Junctionzc/flask-blog
+
 *****
 **6月9日**
 
