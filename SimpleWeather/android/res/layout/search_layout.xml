@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>  
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"  
+    android:orientation="horizontal"   
+    android:layout_width="match_parent"  
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent" 
+    android:focusable="true"
+    android:focusableInTouchMode="true" >  
+      
+    <EditText android:id="@+id/search_city_name"  
+        android:layout_width="0dp"  
+        android:layout_height="30dp"  
+        android:layout_weight="5"
+        android:layout_marginLeft="12dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:singleLine="true"    
+        android:layout_marginRight="10dp" 
+        android:background="#FFF"  
+        android:textSize="15sp"  
+        android:textColor="#000"
+        android:paddingLeft="5dp"
+        android:hint="查询的城市名字"/> 
+          
+     <Button android:id="@+id/search_button"  
+         android:layout_width="50dp"  
+         android:layout_height="50dp"  
+         android:layout_marginRight="6dp"
+         android:layout_marginTop="3dp"
+         android:layout_marginBottom="5dp"
+         android:gravity="center"  
+         android:layout_centerVertical="true"  
+         android:layout_alignParentRight="true" 
+         android:background="@drawable/search" 
+         android:textSize="12sp"  
+         android:textStyle="bold"   
+         android:text=""/>  
+                 
+</LinearLayout>
